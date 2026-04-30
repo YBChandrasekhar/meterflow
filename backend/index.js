@@ -23,6 +23,7 @@ const io = new Server(server, {
 const allowedOrigins = [
   process.env.CLIENT_URL,
   'http://localhost:5173',
+  'https://meterflow-delta.vercel.app',
 ];
 
 app.use(cors({
@@ -31,7 +32,11 @@ app.use(cors({
     else callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
 }));
+
+app.options('*', cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
