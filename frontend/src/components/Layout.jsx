@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 const links = [
   { to: '/dashboard', label: '📊 Dashboard' },
   { to: '/apis', label: '🔌 My APIs' },
+  { to: '/ratelimit', label: '⚡ Rate Limits' },
   { to: '/billing', label: '💳 Billing' },
 ];
 
