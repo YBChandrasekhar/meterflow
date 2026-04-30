@@ -11,6 +11,9 @@ const apiRoutes = require('./routes/apiRoutes');
 const usageRoutes = require('./routes/usageRoutes');
 const gatewayRoutes = require('./routes/gatewayRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const auditRoutes = require('./routes/auditRoutes');
+const webhookRoutes = require('./routes/webhookRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const { startBillingWorker } = require('./services/billingJob');
 
 const app = express();
@@ -45,6 +48,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/apis', apiRoutes);
 app.use('/api/usage', usageRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/audit', auditRoutes);
+app.use('/api/webhooks', webhookRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/gateway', gatewayRoutes);
 
 // Health check

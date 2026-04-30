@@ -89,4 +89,13 @@ const getPublishableKey = (req, res) => {
   res.json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
 };
 
-module.exports = { createCheckoutSession, verifyPayment, getPaymentHistory, getPlans, getPublishableKey };
+const downgradeToFree = async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user.id, { plan: 'free' });
+    res.json({ message: 'Downgraded to free plan' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = { createCheckoutSession, verifyPayment, getPaymentHistory, getPlans, getPublishableKey, downgradeToFree };

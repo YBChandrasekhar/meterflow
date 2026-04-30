@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { authenticate } = require('../middleware/auth');
+const audit = require('../middleware/audit');
 const {
   createApi, getMyApis, getApiById, updateApi, deleteApi,
   generateKey, getApiKeys, revokeKey, rotateKey
@@ -7,15 +8,15 @@ const {
 
 router.use(authenticate);
 
-router.post('/', createApi);
+router.post('/', audit('CREATE', 'api'), createApi);
 router.get('/', getMyApis);
 router.get('/:id', getApiById);
-router.put('/:id', updateApi);
-router.delete('/:id', deleteApi);
+router.put('/:id', audit('UPDATE', 'api'), updateApi);
+router.delete('/:id', audit('DELETE', 'api'), deleteApi);
 
-router.post('/:id/keys', generateKey);
+router.post('/:id/keys', audit('GENERATE_KEY', 'apikey'), generateKey);
 router.get('/:id/keys', getApiKeys);
-router.patch('/:id/keys/:keyId/revoke', revokeKey);
-router.patch('/:id/keys/:keyId/rotate', rotateKey);
+router.patch('/:id/keys/:keyId/revoke', audit('REVOKE_KEY', 'apikey'), revokeKey);
+router.patch('/:id/keys/:keyId/rotate', audit('ROTATE_KEY', 'apikey'), rotateKey);
 
 module.exports = router;
