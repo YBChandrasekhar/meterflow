@@ -6,6 +6,7 @@ const links = [
   { to: '/dashboard', label: '📊 Dashboard' },
   { to: '/apis', label: '🔌 My APIs' },
   { to: '/ratelimit', label: '⚡ Rate Limits' },
+  { to: '/pricing', label: '💎 Pricing' },
   { to: '/billing', label: '💳 Billing' },
 ];
 
