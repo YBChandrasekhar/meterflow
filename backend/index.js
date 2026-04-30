@@ -10,6 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const apiRoutes = require('./routes/apiRoutes');
 const usageRoutes = require('./routes/usageRoutes');
 const gatewayRoutes = require('./routes/gatewayRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 const { startBillingWorker } = require('./services/billingJob');
 
 const app = express();
@@ -27,6 +28,7 @@ app.use(morgan('dev'));
 app.use('/api/auth', authRoutes);
 app.use('/api/apis', apiRoutes);
 app.use('/api/usage', usageRoutes);
+app.use('/api/payment', paymentRoutes);
 app.use('/gateway', gatewayRoutes);
 
 // Health check

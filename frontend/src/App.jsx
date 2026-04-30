@@ -7,6 +7,7 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Pricing from './pages/Pricing';
 import RateLimit from './pages/RateLimit';
 import APIs from './pages/APIs';
 import Billing from './pages/Billing';
@@ -34,6 +35,9 @@ export default function App() {
             } />
             <Route path="/ratelimit" element={
               <ProtectedRoute><Layout><RateLimit /></Layout></ProtectedRoute>
+            } />
+            <Route path="/pricing" element={
+              <ProtectedRoute><Layout><Pricing /></Layout></ProtectedRoute>
             } />
           </Routes>
         </BrowserRouter>
