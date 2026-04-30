@@ -4,6 +4,8 @@ const UsageLog = require('../models/UsageLog');
 const redis = require('../config/redis');
 const axios = require('axios');
 
+const { triggerWebhook } = require('../services/webhookService');
+
 const PLAN_LIMITS = {
   free: 60,
   pro: 600,
@@ -40,6 +42,11 @@ const gateway = async (req, res) => {
   res.set('X-RateLimit-Plan', userPlan);
 
   if (requests > planLimit) {
+    triggerWebhook(apiKey.userId, 'rate_limit_exceeded', {
+      apiKey: keyValue.slice(0, 10) + '...',
+      limit: planLimit,
+      plan: userPlan,
+    });
     return res.status(429).json({
       message: 'Rate limit exceeded',
       limit: planLimit,
@@ -49,7 +56,9 @@ const gateway = async (req, res) => {
   }
 
   // 3. Forward request to actual API
-  const targetUrl = `${api.baseUrl}/${req.params.path || ''}`;
+  const base = api.baseUrl.replace(/\/+$/, '');
+  const path = (req.params.path || '').replace(/^\/+/, '');
+  const targetUrl = path ? `${base}/${path}` : base;
   let statusCode = 500;
   let responseData;
 
@@ -66,7 +75,7 @@ const gateway = async (req, res) => {
     responseData = response.data;
   } catch (err) {
     statusCode = err.response?.status || 500;
-    responseData = err.response?.data || { message: 'Gateway error' };
+    responseData = err.response?.data || { message: `Gateway error: ${err.message}` };
   }
 
   const latency = Date.now() - start;

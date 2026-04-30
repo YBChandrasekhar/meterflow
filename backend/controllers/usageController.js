@@ -1,5 +1,6 @@
 const UsageLog = require('../models/UsageLog');
 const Billing = require('../models/Billing');
+const mongoose = require('mongoose');
 
 const PRICING = {
   free: { freeRequests: 1000, pricePerHundred: 0 },
@@ -37,7 +38,8 @@ const getRateLimitStatus = async (req, res) => {
 const getUsageSummary = async (req, res) => {
   try {
     const { from, to } = req.query;
-    const filter = { userId: req.user.id };
+    const userId = new mongoose.Types.ObjectId(req.user.id);
+    const filter = { userId };
     if (from || to) {
       filter.timestamp = {};
       if (from) filter.timestamp.$gte = new Date(from);
@@ -70,9 +72,10 @@ const getDailyUsage = async (req, res) => {
     const days = parseInt(req.query.days) || 30;
     const from = new Date();
     from.setDate(from.getDate() - days);
+    const userId = new mongoose.Types.ObjectId(req.user.id);
 
     const data = await UsageLog.aggregate([
-      { $match: { userId: req.user.id, timestamp: { $gte: from } } },
+      { $match: { userId, timestamp: { $gte: from } } },
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
@@ -96,9 +99,10 @@ const calculateBilling = async (req, res) => {
     const [year, mon] = month.split('-');
     const from = new Date(year, mon - 1, 1);
     const to = new Date(year, mon, 1);
+    const userId = new mongoose.Types.ObjectId(req.user.id);
 
     const totalRequests = await UsageLog.countDocuments({
-      userId: req.user.id,
+      userId,
       timestamp: { $gte: from, $lt: to }
     });
 
