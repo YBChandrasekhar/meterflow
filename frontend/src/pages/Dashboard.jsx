@@ -28,6 +28,20 @@ export default function Dashboard() {
     queryFn: () => api.get('/usage/billing').then(r => r.data),
   });
 
+  const { data: apis } = useQuery({
+    queryKey: ['apis'],
+    queryFn: () => api.get('/apis').then(r => r.data),
+  });
+
+  const { data: allKeys } = useQuery({
+    queryKey: ['all-keys-count'],
+    queryFn: async () => {
+      const apisData = await api.get('/apis').then(r => r.data);
+      const counts = await Promise.all(apisData.map(a => api.get(`/apis/${a._id}/keys`).then(r => r.data)));
+      return counts.flat().filter(k => k.status === 'active').length;
+    },
+  });
+
   const errors = summary?.byStatus?.filter(s => s._id >= 400).reduce((a, b) => a + b.count, 0) || 0;
 
   return (
@@ -39,9 +53,14 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Requests" value={summary?.total || 0} />
+        <StatCard label="Active API Keys" value={allKeys || 0} color="text-yellow-400" />
         <StatCard label="Errors" value={errors} color="text-red-400" />
         <StatCard label="Plan" value={user?.plan?.toUpperCase() || 'FREE'} color="text-blue-400" />
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-2 gap-4">
         <StatCard label="Amount Due" value={`₹${billing?.amount?.toFixed(2) || '0.00'}`} color="text-green-400" />
+        <StatCard label="Total APIs" value={apis?.length || 0} color="text-purple-400" />
       </div>
 
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">

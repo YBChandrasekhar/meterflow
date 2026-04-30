@@ -6,6 +6,34 @@ const PRICING = {
   pro: { freeRequests: 1000, pricePerHundred: 0.5 },
 };
 
+const PLAN_LIMITS = { free: 60, pro: 600 };
+
+const getRateLimitStatus = async (req, res) => {
+  try {
+    const redis = require('../config/redis');
+    const ApiKey = require('../models/ApiKey');
+    const keys = await ApiKey.find({ userId: req.user.id, status: 'active' });
+
+    const statuses = await Promise.all(keys.map(async (k) => {
+      const count = await redis.get(`rate:${k.key}`) || 0;
+      const limit = PLAN_LIMITS[req.user.plan] || 60;
+      return {
+        keyId: k._id,
+        label: k.label,
+        key: k.key.slice(0, 10) + '...',
+        used: parseInt(count),
+        limit,
+        remaining: Math.max(0, limit - parseInt(count)),
+        percentage: Math.min(100, Math.round((parseInt(count) / limit) * 100)),
+      };
+    }));
+
+    res.json(statuses);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 const getUsageSummary = async (req, res) => {
   try {
     const { from, to } = req.query;
@@ -100,4 +128,4 @@ const getBillingHistory = async (req, res) => {
   }
 };
 
-module.exports = { getUsageSummary, getDailyUsage, calculateBilling, getBillingHistory };
+module.exports = { getUsageSummary, getDailyUsage, calculateBilling, getBillingHistory, getRateLimitStatus };
