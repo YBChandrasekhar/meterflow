@@ -3,14 +3,24 @@ const UsageLog = require('../models/UsageLog');
 const Billing = require('../models/Billing');
 const User = require('../models/User');
 
-const connection = {
-  host: process.env.REDIS_URL ? new URL(process.env.REDIS_URL).hostname : 'localhost',
-  port: process.env.REDIS_URL ? new URL(process.env.REDIS_URL).port : 6379,
-  password: process.env.REDIS_URL ? new URL(process.env.REDIS_URL).password : undefined,
-  tls: process.env.REDIS_URL?.startsWith('rediss') ? {} : undefined,
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
+const getConnection = () => {
+  const url = process.env.REDIS_URL || 'redis://localhost:6379';
+  try {
+    const parsed = new URL(url);
+    return {
+      host: parsed.hostname,
+      port: parseInt(parsed.port) || 6379,
+      password: parsed.password || undefined,
+      tls: url.startsWith('rediss') ? {} : undefined,
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+    };
+  } catch {
+    return { host: 'localhost', port: 6379, maxRetriesPerRequest: null, enableReadyCheck: false };
+  }
 };
+
+const connection = getConnection();
 
 const PRICING = {
   free: { freeRequests: 1000, pricePerHundred: 0 },
