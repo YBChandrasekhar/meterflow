@@ -36,7 +36,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
 }));
 
-app.options('*', cors());
+app.options('/{*path}', cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
